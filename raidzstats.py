@@ -5,15 +5,19 @@ class RaidzStats:
     def _calcstorage(self, disks, size):
         return disks * size - (self.raidzlevel * size)
 
-    def _calccost(self, disks, size, cost):
-        return (cost * disks) / self._calcstorage(disks, size)
+    def _calccost(self, disks, cost):
+        return cost * disks
+
+    def _calccostpertb(self, disks, size, cost):
+        return self._calccost(disks, cost) / self._calcstorage(disks, size)
 
     def getstats(self, disks, size, cost):
-        print("{2} * {3}TB disks: {0} TB, ${1}/TB".format(
+        print("{2} * {3} TB disks: {0} TB, ${1}/TB, ${4}".format(
                   self._calcstorage(disks, size),
-                  self._calccost(disks, size, cost),
+                  self._calccostpertb(disks, size, cost),
                   disks,
-                  size))
+                  size,
+                  self._calccost(disks, cost)))
 
 if __name__ == "__main__":
     prices = {
@@ -23,7 +27,7 @@ if __name__ == "__main__":
     }
 
     rs = RaidzStats(raidzlevel=2)
-    for n in xrange(3, 7):
+    for n in xrange(3, 10):
         for s, p in prices.items(): 
             rs.getstats(n, s, p)
 
