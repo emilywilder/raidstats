@@ -1,0 +1,18 @@
+{"raidstats": [
+    {
+        "name": "Category 1",
+        "devices": [
+            {"Size": 1, "Price": 100.00, "Model": "CHEAPO1"},
+            {"Size": 2, "Price": 200.00, "Model": "CHEAPO2"},
+            {"Size": 3, "Price": 300.00, "Model": "CHEAPO3"}
+        ]
+    },
+    {
+        "name": "Category 2",
+        "devices": [
+            {"Size": 1, "Price": 200.00, "Model": "SUPERDUPER1"},
+            {"Size": 2, "Price": 400.00, "Model": "SUPERDUPER2"},
+            {"Size": 3, "Price": 600.00, "Model": "SUPERDUPER3"}
+        ]
+    }
+]}
