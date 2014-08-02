@@ -2,7 +2,7 @@ import json
 import argparse
 import logging
 
-class RaidzStats:
+class RaidStats:
     def __init__(self, raidzlevel=1, mindisks=3, maxdisks=9):
         self.raidzlevel = raidzlevel
         self.mindisks = mindisks
@@ -64,7 +64,7 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    rs = RaidzStats(raidzlevel=2, maxdisks=6)
+    rs = RaidStats(raidzlevel=2, maxdisks=6)
     for devicefile in args.devicefile:
         with open(devicefile, "r") as f:
             rs.printstats(f, csv=args.csv)
