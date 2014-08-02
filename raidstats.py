@@ -24,38 +24,37 @@ class RaidStats:
         return self._calccost(disks, cost) / self._calcstorage(disks, size)
 
     def printstats(self, devices, csv=False):
-        devices = json.load(devices)
+        category = json.load(devices)
 
         logger = self.logger
 
         formatstring = "{2} * {5} ({3} TB), {0}, ${1:.2f}, ${4:.2f}"
 
-        for category in devices.get("raidstats"):
-            if csv:
-                csvlogger = logging.getLogger(category.get("name"))
-                csvlogger.setLevel(logging.INFO)
-                handler = logging.FileHandler("{0}.csv".format(category.get("name")), mode='w')
-                handler.setFormatter(self.formatter)
-                csvlogger.addHandler(handler)
-                logger = csvlogger
+        if csv:
+            csvlogger = logging.getLogger(category.get("name"))
+            csvlogger.setLevel(logging.INFO)
+            handler = logging.FileHandler("{0}.csv".format(category.get("name")), mode='w')
+            handler.setFormatter(self.formatter)
+            csvlogger.addHandler(handler)
+            logger = csvlogger
 
-            logger.info(category.get("name"))
-            logger.info("Configuration (RAIDZ{0}), Redundant Storage (in TB), $USD/TB, Total $USD".format(self.raidzlevel))
+        logger.info(category.get("name"))
+        logger.info("Configuration (RAIDZ{0}), Redundant Storage (in TB), $USD/TB, Total $USD".format(self.raidzlevel))
 
-            for device in category.get("devices"):
-                for disks in range(self.mindisks, self.maxdisks+1):
-                    size = device.get("Size")
-                    cost = device.get("Price")
-                    logger.info(formatstring.format(
-                        self._calcstorage(disks, size),
-                        self._calccostpertb(disks, size, cost),
-                        disks,
-                        size,
-                        self._calccost(disks, cost),
-                        device.get("Model")))
+        for device in category.get("devices"):
+            for disks in range(self.mindisks, self.maxdisks+1):
+                size = device.get("Size")
+                cost = device.get("Price")
+                logger.info(formatstring.format(
+                    self._calcstorage(disks, size),
+                    self._calccostpertb(disks, size, cost),
+                    disks,
+                    size,
+                    self._calccost(disks, cost),
+                    device.get("Model")))
 
-            if csv:
-                self.logger.info("Wrote {0}".format(logger.handlers[0].stream.name))
+        if csv:
+            self.logger.info("Wrote {0}".format(logger.handlers[0].stream.name))
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Compute Raid solutions")
