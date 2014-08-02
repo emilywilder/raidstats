@@ -23,19 +23,19 @@ class RaidzStats:
         logger = logging.getLogger("printstats")
         logger.setLevel(logging.INFO)
         log_formatter = logging.Formatter("%(message)s")
-        formatstring = "{2} * {5} ({3} TB): {0} TB, ${1:,.2f}/TB, ${4:,.2f}"
+        formatstring = "{2} * {5} ({3} TB), {0}, ${1:.2f}, ${4:.2f}"
 
         if csv:
             csvlog = logging.FileHandler("raidstats.csv", mode='w')
             csvlog.setFormatter(log_formatter)
             logger.addHandler(csvlog)
 
-            logger.info("Configuration (RAIDZ{0}),Redundant Storage (in TB),$USD/TB,Total $USD".format(self.raidzlevel))
-            formatstring = "{2}*{5} ({3} TB),{0},${1:.2f},${4:.2f}"
         else:
             console_log = logging.StreamHandler()
             console_log.setFormatter(log_formatter)
             logger.addHandler(console_log)
+
+        logger.info("Configuration (RAIDZ{0}), Redundant Storage (in TB), $USD/TB, Total $USD".format(self.raidzlevel))
 
         for category in devices.get("raidstats"):
             for device in category.get("devices"):
