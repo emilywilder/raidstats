@@ -1,3 +1,4 @@
+import os
 import json
 import argparse
 import logging
@@ -31,9 +32,11 @@ class RaidStats:
         formatstring = "{2} * {5} ({3} TB), {0}, ${1:.2f}, ${4:.2f}"
 
         if csv:
-            csvlogger = logging.getLogger(category.get("name"))
+            devices_filename = os.path.splitext(os.path.basename(devices.name))[0]
+            csvfilename = "{0}.csv".format(devices_filename)
+            csvlogger = logging.getLogger(csvfilename)
             csvlogger.setLevel(logging.INFO)
-            handler = logging.FileHandler("{0}.csv".format(category.get("name")), mode='w')
+            handler = logging.FileHandler(csvfilename, mode='w')
             handler.setFormatter(self.formatter)
             csvlogger.addHandler(handler)
             logger = csvlogger
@@ -54,7 +57,8 @@ class RaidStats:
                     device.get("Model")))
 
         if csv:
-            self.logger.info("Wrote {0}".format(logger.handlers[0].stream.name))
+            written_filename = os.path.basename(logger.handlers[0].stream.name)
+            self.logger.info("Wrote {0}".format(written_filename))
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Compute Raid solutions")
