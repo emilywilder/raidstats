@@ -38,12 +38,13 @@ class RaidzStats:
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Compute Raid solutions")
-    parser.add_argument("devicefile")
+    parser.add_argument("devicefile", nargs="+")
     parser.add_argument("--csv", action='store_true', default=False)
 
     args = parser.parse_args()
 
     rs = RaidzStats(raidzlevel=2, maxdisks=6)
-    with open(args.devicefile, "r") as f:
-        rs.printstats(f, csv=args.csv)
+    for devicefile in args.devicefile:
+        with open(devicefile, "r") as f:
+            rs.printstats(f, csv=args.csv)
 
