@@ -1,11 +1,9 @@
+import json
+import argparse
+
 class RaidzStats:
     def __init__(self, raidzlevel=1, mindisks=3, maxdisks=9):
         self.raidzlevel = raidzlevel
-        self.prices = {
-            2: 100,
-            3: 130,
-            4: 180
-        }
         self.mindisks = mindisks
         self.maxdisks = maxdisks
 
@@ -18,22 +16,34 @@ class RaidzStats:
     def _calccostpertb(self, disks, size, cost):
         return self._calccost(disks, cost) / self._calcstorage(disks, size)
 
-    def printstats(self, csv=False):
-        formatstring = "{2} * {3} TB disks: {0} TB, ${1}/TB, ${4}"
+    def printstats(self, devices, csv=False):
+        devices = json.load(devices)
+        formatstring = "{2} * {5} ({3} TB): {0} TB, ${1:,.2f}/TB, ${4:,.2f}"
         if csv:
             print("Configuration (RAIDZ{0}),Redundant Storage (in TB),$USD/TB,Total $USD".format(self.raidzlevel))
-            formatstring = "{2}*{3} TB disks,{0},${1},${4}"
+            formatstring = "{2}*{5} ({3} TB),{0},${1:.2f},${4:.2f}"
 
-        for disks in xrange(self.mindisks, self.maxdisks+1):
-            for size, cost in self.prices.items(): 
-                print(formatstring.format(
-                    self._calcstorage(disks, size),
-                    self._calccostpertb(disks, size, cost),
-                    disks,
-                    size,
-                    self._calccost(disks, cost)))
+        for category in devices.get("raidstats"):
+            for device in category.get("devices"):
+                for disks in range(self.mindisks, self.maxdisks+1):
+                    size = device.get("Size")
+                    cost = device.get("Price")
+                    print(formatstring.format(
+                        self._calcstorage(disks, size),
+                        self._calccostpertb(disks, size, cost),
+                        disks,
+                        size,
+                        self._calccost(disks, cost),
+                        device.get("Model")))
 
 if __name__ == "__main__":
-    rs = RaidzStats(raidzlevel=1, maxdisks=6)
-    rs.printstats(csv=True)
+    parser = argparse.ArgumentParser(description="Compute Raid solutions")
+    parser.add_argument("devicefile")
+    parser.add_argument("--csv", action='store_true', default=False)
+
+    args = parser.parse_args()
+
+    rs = RaidzStats(raidzlevel=2, maxdisks=6)
+    with open(args.devicefile, "r") as f:
+        rs.printstats(f, csv=args.csv)
 
