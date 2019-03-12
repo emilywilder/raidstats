@@ -29,7 +29,7 @@ class RaidStats:
 
         logger = self.logger
 
-        formatstring = "{2} * {5} ({3} TB), {0}, ${1:.2f}, ${4:.2f}"
+        formatstring = "{6}, {2} * {5} ({3} TB), {0}, ${1:.2f}, ${4:.2f}"
 
         if csv:
             devices_filename = os.path.splitext(os.path.basename(devices.name))[0]
@@ -41,8 +41,8 @@ class RaidStats:
             csvlogger.addHandler(handler)
             logger = csvlogger
 
-        logger.info(category.get("name"))
-        logger.info("Configuration (RAIDZ{0}), Redundant Storage (in TB), $USD/TB, Total $USD".format(self.raidzlevel))
+#        logger.info(category.get("name"))
+        logger.info("Category, Configuration (RAIDZ{0}), Redundant Storage (in TB), $USD/TB, Total $USD".format(self.raidzlevel))
 
         for device in category.get("devices"):
             for disks in range(self.mindisks, self.maxdisks+1):
@@ -54,7 +54,8 @@ class RaidStats:
                     disks,
                     size,
                     self._calccost(disks, cost),
-                    device.get("Model")))
+                    device.get("Model"),
+                    category.get("name")))
 
         if csv:
             written_filename = os.path.basename(logger.handlers[0].stream.name)
