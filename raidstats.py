@@ -4,8 +4,8 @@ import argparse
 import logging
 
 class RaidStats:
-    def __init__(self, raidzlevel=1, mindisks=3, maxdisks=9):
-        self.raidzlevel = raidzlevel
+    def __init__(self, raidtype='raidz2', mindisks=3, maxdisks=9):
+        self.raidtype = raidtype
         self.mindisks = mindisks
         self.maxdisks = maxdisks
         self.logger = logging.getLogger("RaidStats")
@@ -16,7 +16,16 @@ class RaidStats:
         self.logger.addHandler(console_log)
 
     def _calcstorage(self, disks, size):
-        return disks * size - (self.raidzlevel * size)
+        if self.raidtype == 'mirror':
+            _disks = disks / 2
+        elif self.raidtype == 'raidz':
+            _disks = disks - 1
+        elif self.raidtype == 'raidz2':
+            _disks = disks - 2
+        else:
+            raise RuntimeError("unknown raidtype")
+
+        return _disks * size
 
     def _calccost(self, disks, cost):
         return cost * disks
@@ -42,20 +51,21 @@ class RaidStats:
             logger = csvlogger
 
 #        logger.info(category.get("name"))
-        logger.info("Category, Configuration (RAIDZ{0}), Redundant Storage (in TB), $USD/TB, Total $USD".format(self.raidzlevel))
+        logger.info("Category, Configuration ({0}), Redundant Storage (in TB), $USD/TB, Total $USD".format(self.raidtype))
 
         for device in category.get("devices"):
             for disks in range(self.mindisks, self.maxdisks+1):
-                size = device.get("Size")
-                cost = device.get("Price")
-                logger.info(formatstring.format(
-                    self._calcstorage(disks, size),
-                    self._calccostpertb(disks, size, cost),
-                    disks,
-                    size,
-                    self._calccost(disks, cost),
-                    device.get("Model"),
-                    category.get("name")))
+                if self.raidtype.startswith('raidz') or (self.raidtype.startswith('mirror') and (disks % 2) == 0):
+                    size = device.get("Size")
+                    cost = device.get("Price")
+                    logger.info(formatstring.format(
+                        self._calcstorage(disks, size),
+                        self._calccostpertb(disks, size, cost),
+                        disks,
+                        size,
+                        self._calccost(disks, cost),
+                        device.get("Model"),
+                        category.get("name")))
 
         if csv:
             written_filename = os.path.basename(logger.handlers[0].stream.name)
@@ -64,11 +74,12 @@ class RaidStats:
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Compute Raid solutions")
     parser.add_argument("devicefile", nargs="+")
+    parser.add_argument("raidtype", choices=['mirror', 'raidz', 'raidz2'])
     parser.add_argument("--csv", action='store_true', default=False)
 
     args = parser.parse_args()
 
-    rs = RaidStats(raidzlevel=2, maxdisks=6)
+    rs = RaidStats(raidtype=args.raidtype, maxdisks=6)
     for devicefile in args.devicefile:
         with open(devicefile, "r") as f:
             rs.printstats(f, csv=args.csv)
