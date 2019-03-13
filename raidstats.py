@@ -42,7 +42,7 @@ class RaidStats:
 
         if csv:
             devices_filename = os.path.splitext(os.path.basename(devices.name))[0]
-            csvfilename = "{0}.csv".format(devices_filename)
+            csvfilename = "{0}-{1}.csv".format(devices_filename, self.raidtype)
             csvlogger = logging.getLogger(csvfilename)
             csvlogger.setLevel(logging.INFO)
             handler = logging.FileHandler(csvfilename, mode='w')
